@@ -141,7 +141,6 @@
                                         <apex:commandbutton style=" background-color: #f5650f; color:#ffffff; border-color: #f5650f;" action="{!ClosePopup}" rerender="redirect"   value="Show Details" styleClass="slds-button slds-button_brand disableBtn" onclick="DisableBtn();">
                                         </apex:commandbutton>
                                         
-                                        
                                     </footer>
                                     
                                     
@@ -192,7 +191,7 @@
                                         <p>
                                             <b>Verification Status : 
                                                 <span style="display: inline-block;color: red;font-size:inherit;font-style: normal; ">
-                                                    Required Fields are missing : {!error}  
+                                                   {!error}  
                                                 </span>
                                             </b>
                                         </p>
@@ -263,6 +262,12 @@
     <script>
     
     var i = 0;
+    function openVerifySite(event)
+    {
+        event.preventDefault();
+        redirectToVerifySite();
+    }
+    //Changes end
     function hide(){
         var x = document.getElementsByClassName("hide");
         x[0].style.display = "none";
@@ -298,25 +303,27 @@
         var limitations = [];
         var outOfPockets = [];
         var PlanProduct = [];
-        var benefitsList = fullResponseJson.message.cache.benefits;
+        var benefitsList = fullResponseJson.cache.benefits;
         // if(benefitsList.hasOwnProperty('no_network')){
         // Deductible(fullResponseJson.message.cache.benefits.no_network, 'No Network',resultRecId);
         //  }
-        if(benefitsList.hasOwnProperty('in_network')){
-        Deductible(fullResponseJson.message.cache.benefits.in_network, 'In Network', resultRecId);
-            }
-        if(benefitsList.hasOwnProperty('out_of_network')){
-        Deductible(fullResponseJson.message.cache.benefits.out_of_network, 'Out Of Network', resultRecId);
-            }
-        if(benefitsList.hasOwnProperty('not_applicable_network')){
-        Deductible(fullResponseJson.message.cache.benefits.not_applicable_network, 'Not Applicable Network', resultRecId);
-            }
+        //if(benefitsList.hasOwnProperty('in_network')){
+        Deductible(fullResponseJson.cache.benefits.in_network, 'In Network', resultRecId);
+        //  }
+        //if(benefitsList.hasOwnProperty('out_of_network')){
+        Deductible(fullResponseJson.cache.benefits.out_of_network, 'Out Of Network', resultRecId);
+            // }
+        //if(benefitsList.hasOwnProperty('not_applicable_network')){
+        Deductible(fullResponseJson.cache.benefits.not_applicable_network, 'Not Applicable Network', resultRecId);
+        // }
         
         
             function Deductible(netStr, ntwrkType, resultRecId){
+                console.log(netStr);
                 let dedArray = netStr;
                 for(let i=0; i<dedArray.length; i++) {
                     if(dedArray[i].hasOwnProperty('deductibles') && dedArray[i].deductibles.length > 0){
+                        console.log('deductibles found');
                         for(let j=0; j<dedArray[i].deductibles.length; j++){
                             var auth;
                             if(dedArray[i].deductibles[j].hasOwnProperty('authorizationRequired')){
@@ -401,6 +408,8 @@
                             
                             
                             dedSF.push(ded);
+                            var CoInsField = document.getElementById("page:form:deductible");
+                            CoInsField.value = JSON.stringify(dedSF);
                         }
                     }
                     if(dedArray[i].hasOwnProperty('coInsurance') && dedArray[i].coInsurance.length > 0){
@@ -476,6 +485,8 @@
                                 coIns.VerifyTx__Plan_Start_Date__c = dedArray[i].coInsurance[j].planStartDate;
                             }
                             coInsSF.push(coIns);
+                            var CoInsField = document.getElementById("page:form:coIns");
+                            CoInsField.value = JSON.stringify(coInsSF);
                         }
                     }
                     if(dedArray[i].hasOwnProperty('coPayment') && dedArray[i].coPayment.length > 0){
@@ -548,7 +559,8 @@
                                 coPay.VerifyTx__Plan_Start_Date__c = dedArray[i].coPayment[j].planStartDate;
                             }
                             coPays.push(coPay);
-                            
+                             var CoPaysField = document.getElementById("page:form:coPays");
+                            CoPaysField.value = JSON.stringify(coPays);
                         }
                     }
                     if(dedArray[i].hasOwnProperty('outOfPocket') && dedArray[i].outOfPocket.length > 0){
@@ -634,7 +646,8 @@
                             }
                             
                             outOfPockets.push(outOfPocket);
-                            
+                            var OutOfPocketField = document.getElementById("page:form:outOfPockets");
+                            OutOfPocketField.value = JSON.stringify(outOfPockets);
                         }
                     }
                     if(dedArray[i].hasOwnProperty('limitations') && dedArray[i].limitations.length > 0){
@@ -696,7 +709,8 @@
                                 limitation.VerifyTx__Amount_Time_Period__c = dedArray[i].limitations[j].amountTimePeriod;
                             }
                             limitations.push(limitation);
-                            
+                            var LimitationField = document.getElementById("page:form:limitations");
+                            LimitationField.value = JSON.stringify(limitations);
                         }
                     }
                     if(dedArray[i].hasOwnProperty('contacts') && dedArray[i].contacts.length > 0){
@@ -732,7 +746,10 @@
                     if(dedArray[i].contacts[j].hasOwnProperty('category')){
                         InsContact.VerifyTx__Category__c = dedArray[i].contacts[j].category;
                     }
-                    InsContacts.push(InsContact);
+                            InsContacts.push(InsContact);
+                            var insContactsField = document.getElementById("page:form:insContacts");
+                            insContactsField.value = JSON.stringify(InsContacts);
+
                 }
                 }
                     
@@ -808,32 +825,13 @@
                 }
             
             
-             PlanProduct.push(plan);
+                PlanProduct.push(plan);
+                var planProductsField = document.getElementById("page:form:planProducts");
+                planProductsField.value = JSON.stringify(PlanProduct);
             }
             
         }
             }
-        
-        var CoInsField = document.getElementById("page:form:deductible");
-        CoInsField.value = JSON.stringify(dedSF);
-        
-        var CoInsField = document.getElementById("page:form:coIns");
-        CoInsField.value = JSON.stringify(coInsSF);
-        
-        var CoPaysField = document.getElementById("page:form:coPays");
-        CoPaysField.value = JSON.stringify(coPays);
-        
-        var OutOfPocketField = document.getElementById("page:form:outOfPockets");
-        OutOfPocketField.value = JSON.stringify(outOfPockets);
-        
-        var LimitationField = document.getElementById("page:form:limitations");
-        LimitationField.value = JSON.stringify(limitations);
-        
-        var planProductsField = document.getElementById("page:form:planProducts");
-        planProductsField.value = JSON.stringify(PlanProduct);
-        
-         var insContactsField = document.getElementById("page:form:insContacts");
-        insContactsField.value = JSON.stringify(InsContacts);
         </script>
     </apex:outputPanel>
     
